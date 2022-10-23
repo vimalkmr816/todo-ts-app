@@ -1,58 +1,55 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
-import './App.css';
+import { ChangeEvent, FC, useEffect, useState } from "react"
+import "./App.css"
+import TodoTask from "./components/TodoTask"
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
-    </div>
-  );
+export interface TaskType {
+	taskName: string
+	deadline: number
+}
+const App: FC = () => {
+	const [task, setTask] = useState<string>("")
+	const [deadline, setDeadline] = useState<number>(0)
+	const [todoList, setTodoList] = useState<TaskType[]>([])
+
+	const handleInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
+		if (event.target.name === "task") setTask(event.target.value)
+		if (event.target.name === "deadline") setDeadline(Number(event.target.value))
+	}
+
+	const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>): void => {
+		e.preventDefault()
+		setTodoList([...todoList, { taskName: task, deadline }])
+		setTask("")
+		setDeadline(0)
+	}
+
+	const handleCompleteTask = (taskNameToDelete: string): void => {
+		const newTodoList = todoList.filter(todo => todo.taskName !== taskNameToDelete)
+		setTodoList(newTodoList)
+	}
+
+	useEffect(() => {
+		if (todoList.length > 0) console.log(todoList)
+	}, [todoList])
+
+	return (
+		<div className="App">
+			<header className="header">
+				<form className="form">
+					<input type="text" placeholder="Test..." value={task} name="task" onChange={e => handleInputChange(e)} />
+					<input type="number" placeholder="Deadline..." value={deadline} name="deadline" onChange={e => handleInputChange(e)} />
+					<button type="submit" onClick={e => handleSubmit(e)}>
+						ADD NOTE
+					</button>
+				</form>
+			</header>
+			<main className="todoList">
+				{todoList.map(todo => {
+					return <TodoTask taskName={todo.taskName} deadline={todo.deadline} handleCompleteTask={handleCompleteTask} />
+				})}
+			</main>
+		</div>
+	)
 }
 
-export default App;
+export default App
